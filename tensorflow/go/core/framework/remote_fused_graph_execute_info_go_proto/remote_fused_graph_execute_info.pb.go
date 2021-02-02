@@ -7,9 +7,9 @@
 package remote_fused_graph_execute_info_go_proto
 
 import (
-	graph_go_proto "github.com/tensorflow/tensorflow/tensorflow/go/core/framework/graph_go_proto"
-	tensor_shape_go_proto "github.com/tensorflow/tensorflow/tensorflow/go/core/framework/tensor_shape_go_proto"
-	types_go_proto "github.com/tensorflow/tensorflow/tensorflow/go/core/framework/types_go_proto"
+	graph_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/graph_go_proto"
+	tensor_shape_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/tensor_shape_go_proto"
+	types_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/types_go_proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

@@ -7,7 +7,7 @@
 package tensorflow
 
 import (
-	for_core_protos_go_proto "github.com/tensorflow/tensorflow/tensorflow/go/core/protobuf/for_core_protos_go_proto"
+	for_core_protos_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/protobuf/for_core_protos_go_proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
