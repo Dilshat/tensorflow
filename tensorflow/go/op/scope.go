@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	tf "github.com/galeone/tensorflow/tensorflow/go"
+	tf "github.com/Dilshat/tensorflow/tensorflow/go"
 )
 
 // Scope encapsulates common operation properties when building a Graph.

@@ -21,9 +21,9 @@ import (
 	"go/format"
 	"testing"
 
+	adpb "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/api_def_go_proto"
+	odpb "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/op_def_go_proto"
 	"github.com/golang/protobuf/proto"
-	adpb "github.com/galeone/tensorflow/tensorflow/go/core/framework/api_def_go_proto"
-	odpb "github.com/galeone/tensorflow/tensorflow/go/core/framework/op_def_go_proto"
 )
 
 // Creates an ApiDef based on opdef and applies overrides

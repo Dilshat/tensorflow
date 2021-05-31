@@ -27,7 +27,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/galeone/tensorflow/tensorflow/go/genop/internal"
+	"github.com/Dilshat/tensorflow/tensorflow/go/genop/internal"
 )
 
 func main() {

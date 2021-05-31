@@ -7,9 +7,9 @@
 package function_go_proto
 
 import (
-	attr_value_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/attr_value_go_proto"
-	node_def_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/node_def_go_proto"
-	op_def_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/op_def_go_proto"
+	attr_value_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/attr_value_go_proto"
+	node_def_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/node_def_go_proto"
+	op_def_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/op_def_go_proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

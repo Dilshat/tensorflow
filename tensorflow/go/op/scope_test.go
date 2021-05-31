@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"testing"
 
-	tf "github.com/galeone/tensorflow/tensorflow/go"
+	tf "github.com/Dilshat/tensorflow/tensorflow/go"
 )
 
 func TestScopeSubScope(t *testing.T) {

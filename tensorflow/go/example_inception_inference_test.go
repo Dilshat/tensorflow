@@ -28,8 +28,8 @@ import (
 	"os"
 	"path/filepath"
 
-	tf "github.com/galeone/tensorflow/tensorflow/go"
-	"github.com/galeone/tensorflow/tensorflow/go/op"
+	tf "github.com/Dilshat/tensorflow/tensorflow/go"
+	"github.com/Dilshat/tensorflow/tensorflow/go/op"
 )
 
 func Example() {

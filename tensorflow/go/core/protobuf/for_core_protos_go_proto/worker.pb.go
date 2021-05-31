@@ -22,13 +22,13 @@
 package for_core_protos_go_proto
 
 import (
-	cost_graph_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/cost_graph_go_proto"
-	device_attributes_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/device_attributes_go_proto"
-	graph_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/graph_go_proto"
-	step_stats_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/step_stats_go_proto"
-	tensor_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/tensor_go_proto"
-	tensor_shape_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/tensor_shape_go_proto"
-	types_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/types_go_proto"
+	cost_graph_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/cost_graph_go_proto"
+	device_attributes_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/device_attributes_go_proto"
+	graph_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/graph_go_proto"
+	step_stats_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/step_stats_go_proto"
+	tensor_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/tensor_go_proto"
+	tensor_shape_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/tensor_shape_go_proto"
+	types_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/types_go_proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	anypb "google.golang.org/protobuf/types/known/anypb"

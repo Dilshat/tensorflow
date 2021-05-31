@@ -21,7 +21,7 @@
 # This script acts as a brige between bazel and go so that:
 #   bazel test :test
 # succeeds iff
-#   go test github.com/galeone/tensorflow/tensorflow/go
+#   go test github.com/Dilshat/tensorflow/tensorflow/go
 # succeeds.
 
 set -ex
@@ -42,7 +42,7 @@ fi
 export GOPATH="${TEST_TMPDIR}/go"
 export GOCACHE="${TEST_TMPDIR}/cache"
 mkdir -p "${GOPATH}/src/github.com/tensorflow"
-ln -s -f "${PWD}" "${GOPATH}/src/github.com/galeone/tensorflow"
+ln -s -f "${PWD}" "${GOPATH}/src/github.com/Dilshat/tensorflow"
 
 # Ensure that the TensorFlow C library is accessible to the
 # linker at build and run time.
@@ -72,5 +72,5 @@ fi
 # Document the Go version and run tests
 echo "Go version: $(go version)"
 go test \
-  github.com/galeone/tensorflow/tensorflow/go  \
-  github.com/galeone/tensorflow/tensorflow/go/op
+  github.com/Dilshat/tensorflow/tensorflow/go  \
+  github.com/Dilshat/tensorflow/tensorflow/go/op

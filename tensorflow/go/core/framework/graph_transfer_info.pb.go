@@ -7,7 +7,7 @@
 package graph_transfer_info_go_proto
 
 import (
-	types_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/types_go_proto"
+	types_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/types_go_proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

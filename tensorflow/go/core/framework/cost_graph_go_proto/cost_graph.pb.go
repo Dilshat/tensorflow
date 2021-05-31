@@ -7,8 +7,8 @@
 package cost_graph_go_proto
 
 import (
-	tensor_shape_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/tensor_shape_go_proto"
-	types_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/types_go_proto"
+	tensor_shape_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/tensor_shape_go_proto"
+	types_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/types_go_proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

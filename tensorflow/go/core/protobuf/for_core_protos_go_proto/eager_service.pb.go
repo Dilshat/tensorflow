@@ -7,12 +7,12 @@
 package for_core_protos_go_proto
 
 import (
-	attr_value_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/attr_value_go_proto"
-	device_attributes_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/device_attributes_go_proto"
-	function_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/function_go_proto"
-	tensor_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/tensor_go_proto"
-	tensor_shape_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/tensor_shape_go_proto"
-	versions_go_proto "github.com/galeone/tensorflow/tensorflow/go/core/framework/versions_go_proto"
+	attr_value_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/attr_value_go_proto"
+	device_attributes_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/device_attributes_go_proto"
+	function_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/function_go_proto"
+	tensor_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/tensor_go_proto"
+	tensor_shape_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/tensor_shape_go_proto"
+	versions_go_proto "github.com/Dilshat/tensorflow/tensorflow/go/core/framework/versions_go_proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
