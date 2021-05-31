@@ -1199,12 +1199,23 @@ Status MarkForCompilationPassImpl::FindCompilationCandidates() {
     RecursiveCompilabilityChecker::OperationFilter filter =
         CreateOperationFilter(*registration);
     filter.require_always_compilable = true;
+    filter.allow_string_consts = false;
+    filter.allow_collective_reduce_v2 = false;
 
     RecursiveCompilabilityChecker checker(
         filter, DeviceType{registration->compilation_device_name});
 
     if (!checker.IsCompilableNode(*node, lib_runtime)) {
       continue;
+    }
+
+    if (node->type_string() == "Const") {
+      // Skip Const op with type DT_STRING, since XLA autoclustering doesn't
+      // support it.
+      const AttrValue* attr = node->attrs().Find("dtype");
+      if (attr != nullptr && attr->type() == DT_STRING) {
+        continue;
+      }
     }
 
     if (!allowlist.empty() && !allowlist.contains(node->def().op())) {
@@ -1775,7 +1786,7 @@ absl::flat_hash_map<string, std::vector<string>>* GetAllowlistTable() {
             "Identity", "IdentityN", "Relu", "Relu6", "ReluGrad", "Relu6Grad",
             "LeakyReluGrad", "Elu", "EluGrad", "Selu", "SeluGrad", "Select",
             "SelectV2", "Transpose", "ConjugateTranspose",
-            "_UnaryOpsComposition",
+            "_UnaryOpsComposition", "CollectiveReduceV2",
             // The following 4 operations are converted to identity
             "PlaceholderWithDefault", "PreventGradient", "StopGradient",
             "Snapshot"}},
@@ -1990,6 +2001,8 @@ absl::flat_hash_set<string> GetKnownXLAAllowlistOp() {
                                      "StatelessCase",
                                      "StatelessIf",
                                      "StatelessMultinomial",
+                                     "StatelessRandomGetAlg",
+                                     "StatelessRandomGetKeyCounter",
                                      "StatelessRandomGetKeyCounterAlg",
                                      "StatelessRandomNormal",
                                      "StatelessRandomNormalV2",
@@ -2033,6 +2046,7 @@ absl::flat_hash_set<string> GetKnownXLAAllowlistOp() {
                                      "TensorScatterUpdate",
                                      "TridiagonalSolve",
                                      "TruncatedNormal",
+                                     "Unique",
                                      "UpperBound",
                                      "UnsortedSegmentMax",
                                      "UnsortedSegmentMin",
@@ -2040,11 +2054,14 @@ absl::flat_hash_set<string> GetKnownXLAAllowlistOp() {
                                      "UnsortedSegmentSum",
                                      "VarIsInitializedOp",
                                      "VariableShape",
+                                     "Where",
                                      "While",
                                      "XlaBroadcastHelper",
                                      "XlaConv",
+                                     "XlaConvV2",
                                      "XlaDequantize",
                                      "XlaDot",
+                                     "XlaDotV2",
                                      "XlaDynamicSlice",
                                      "XlaDynamicUpdateSlice",
                                      "XlaEinsum",
@@ -2068,6 +2085,7 @@ absl::flat_hash_set<string> GetKnownXLAAllowlistOp() {
                                      "XlaSpmdShardToFullShape",
                                      "XlaSvd",
                                      "XlaVariadicReduce",
+                                     "XlaVariadicSort",
                                      "XlaWhile",
                                      "Zeta",
                                      "_Arg",

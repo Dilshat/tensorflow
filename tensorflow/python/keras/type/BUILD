@@ -14,8 +14,5 @@ filegroup(
 py_strict_library(
     name = "types",
     srcs = ["types.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        "@six_archive//:six",
-    ],
+    srcs_version = "PY3",
 )

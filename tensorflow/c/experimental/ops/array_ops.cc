@@ -22,14 +22,13 @@ using tensorflow::tracing::MaybeSetOpName;
 namespace tensorflow {
 namespace ops {
 
-Status Identity(AbstractContext* ctx,
-                absl::Span<AbstractTensorHandle* const> inputs,
+Status Identity(AbstractContext* ctx, AbstractTensorHandle* const input,
                 absl::Span<AbstractTensorHandle*> outputs, const char* name) {
   AbstractOperationPtr identity_op(ctx->CreateOperation());
   TF_RETURN_IF_ERROR(
       identity_op->Reset("Identity", /*raw_device_name=*/nullptr));
   TF_RETURN_IF_ERROR(MaybeSetOpName(identity_op.get(), name));
-  TF_RETURN_IF_ERROR(identity_op->AddInput(inputs[0]));
+  TF_RETURN_IF_ERROR(identity_op->AddInput(input));
   int num_retvals = 1;
   return identity_op->Execute(outputs, &num_retvals);
 }
@@ -77,6 +76,18 @@ Status ExpandDims(AbstractContext* ctx,
   TF_RETURN_IF_ERROR(MaybeSetOpName(op.get(), name));
   TF_RETURN_IF_ERROR(op->AddInput(inputs[0]));
   TF_RETURN_IF_ERROR(op->AddInput(inputs[1]));
+  int num_retvals = 1;
+  return op->Execute(outputs, &num_retvals);
+}
+
+Status OnesLike(AbstractContext* ctx,
+                absl::Span<AbstractTensorHandle* const> inputs,
+                absl::Span<AbstractTensorHandle*> outputs, const char* name) {
+  AbstractOperationPtr op(ctx->CreateOperation());
+  TF_RETURN_IF_ERROR(op->Reset("OnesLike", /*raw_device_name=*/nullptr));
+  TF_RETURN_IF_ERROR(MaybeSetOpName(op.get(), name));
+  TF_RETURN_IF_ERROR(op->AddInput(inputs[0]));
+
   int num_retvals = 1;
   return op->Execute(outputs, &num_retvals);
 }

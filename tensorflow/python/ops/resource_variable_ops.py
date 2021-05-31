@@ -27,7 +27,6 @@ import numpy as np
 
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.core.framework import variable_pb2
-from tensorflow.python import _pywrap_utils
 from tensorflow.python.client import pywrap_tf_session
 from tensorflow.python.eager import context
 from tensorflow.python.eager import tape
@@ -53,8 +52,10 @@ from tensorflow.python.ops.gen_resource_variable_ops import *
 # pylint: enable=wildcard-import
 from tensorflow.python.training.tracking import base as trackable
 from tensorflow.python.types import core
+from tensorflow.python.util import _pywrap_utils
 from tensorflow.python.util import compat
 from tensorflow.python.util.deprecation import deprecated
+from tensorflow.python.util.tf_export import tf_export
 
 acd.register_read_only_resource_op("ReadVariableOp")
 acd.register_read_only_resource_op("VariableShape")
@@ -353,6 +354,7 @@ class BaseResourceVariable(variables.VariableV1, core.Tensor):
       save_slice_info=None,
       handle_deleter=None,
       caching_device=None,
+      in_graph_mode=None,
       **unused_kwargs):
     """Creates a variable from a handle.
 
@@ -398,9 +400,15 @@ class BaseResourceVariable(variables.VariableV1, core.Tensor):
         device.  If not `None`, caches on another device.  Typical use is to
         cache on the device where the Ops using the Variable reside, to
         deduplicate copying through `Switch` and other conditional statements.
+      in_graph_mode: whether we are executing in TF1 graph mode. If None, will
+        detect within the function. This is to avoid repeated init_scope()
+        conetxt entrances which can add up.
     """
-    with ops.init_scope():
-      self._in_graph_mode = not context.executing_eagerly()
+    if in_graph_mode is None:
+      with ops.init_scope():
+        self._in_graph_mode = not context.executing_eagerly()
+    else:
+      self._in_graph_mode = in_graph_mode
     synchronization, aggregation, trainable = (
         variables.validate_synchronization_aggregation_trainable(
             synchronization, aggregation, trainable, name))
@@ -501,7 +509,9 @@ class BaseResourceVariable(variables.VariableV1, core.Tensor):
         constraint=self._constraint,
         dtype=self._dtype,
         name=self._shared_name,
-        distribute_strategy=self._distribute_strategy)
+        distribute_strategy=self._distribute_strategy,
+        synchronization=self.synchronization,
+        aggregation=self.aggregation)
     memo[self._unique_id] = copied_variable
     return copied_variable
 
@@ -1939,8 +1949,9 @@ class UninitializedVariable(BaseResourceVariable):
         created inside of.
     """
     with ops.init_scope():
+      # Here we are detecting eagerness within an init_scope, so this will only
+      # be true when we are running in TF1 graph mode.
       self._in_graph_mode = not context.executing_eagerly()
-    with ops.init_scope():
       with ops.name_scope(name, "Variable", skip_on_eager=False) as name:
         handle_name = ops.name_from_scope_name(name)
         if self._in_graph_mode:
@@ -1956,7 +1967,8 @@ class UninitializedVariable(BaseResourceVariable):
             name=name,
             graph_mode=self._in_graph_mode,
             initial_value=extra_handle_data)
-        if not context.executing_eagerly():
+        if self._in_graph_mode:
+          # We only need to add the read_variable_op in TF1.
           with ops.name_scope("Read"):
             # Manually assign reads to the handle's device to avoid log
             # messages.
@@ -1981,7 +1993,8 @@ class UninitializedVariable(BaseResourceVariable):
         graph_element=graph_element,
         trainable=trainable,
         synchronization=synchronization,
-        aggregation=aggregation)
+        aggregation=aggregation,
+        in_graph_mode=self._in_graph_mode)
 
 
 _pywrap_utils.RegisterType("ResourceVariable", ResourceVariable)
@@ -2139,10 +2152,10 @@ def _ReadGrad(_, grad):
 
 
 def variable_shape(handle, out_type=dtypes.int32):
-  if getattr(handle, "_handle_data",
-             None) is None or not handle._handle_data.is_set:  # pylint: disable=protected-access
+  handle_data = get_eager_safe_handle_data(handle)
+  if handle_data is None or not handle_data.is_set:
     return gen_resource_variable_ops.variable_shape(handle, out_type=out_type)
-  shape_proto = handle._handle_data.shape_and_type[0].shape  # pylint: disable=protected-access
+  shape_proto = handle_data.shape_and_type[0].shape
   if shape_proto.unknown_rank or any(x.size == -1 for x in shape_proto.dim):
     return gen_resource_variable_ops.variable_shape(handle, out_type=out_type)
   return constant_op.constant([x.size for x in shape_proto.dim], dtype=out_type)
@@ -2211,6 +2224,7 @@ ops.register_proto_function(
     from_proto=_from_proto_fn)
 
 
+@tf_export("__internal__.ops.is_resource_variable", v1=[])
 def is_resource_variable(var):
   """"Returns True if `var` is to be considered a ResourceVariable."""
   return isinstance(var, BaseResourceVariable) or hasattr(
@@ -2244,9 +2258,14 @@ ops.NotDifferentiable("VariableShape")
 class VariableSpec(tensor_spec.DenseSpec):
   """Describes a tf.Variable."""
 
-  __slots__ = []
+  __slots__ = ["trainable"]
 
   value_type = property(lambda self: BaseResourceVariable)
+
+  def __init__(self, shape, dtype=dtypes.float32,
+               name=None, trainable=True):
+    super(VariableSpec, self).__init__(shape, dtype=dtype, name=name)
+    self.trainable = trainable
 
   def _to_components(self, value):
     raise NotImplementedError

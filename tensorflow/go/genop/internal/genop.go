@@ -47,8 +47,8 @@ import (
 	"unsafe"
 
 	"github.com/golang/protobuf/proto"
-	adpb "github.com/tensorflow/tensorflow/tensorflow/go/core/framework/api_def_go_proto"
-	odpb "github.com/tensorflow/tensorflow/tensorflow/go/core/framework/op_def_go_proto"
+	adpb "github.com/galeone/tensorflow/tensorflow/go/core/framework/api_def_go_proto"
+	odpb "github.com/galeone/tensorflow/tensorflow/go/core/framework/op_def_go_proto"
 )
 
 // GenerateFunctionsForRegisteredOps writes a Go source code file to w
@@ -94,6 +94,9 @@ func updateAPIDefs(m *apiDefMap, dir string) error {
 		return err
 	}
 	for _, file := range files {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".pbtxt") {
+			continue
+		}
 		data, err := ioutil.ReadFile(path.Join(dir, file.Name()))
 		if err != nil {
 			return fmt.Errorf("failed to read %q: %v", file.Name(), err)
@@ -182,7 +185,7 @@ var (
 
 package op
 
-import tf "github.com/tensorflow/tensorflow/tensorflow/go"
+import tf "github.com/galeone/tensorflow/tensorflow/go"
 
 // optionalAttr is an intentionally un-exported type to hide
 // details of how optional attributes to operations are implemented.

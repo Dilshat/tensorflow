@@ -95,8 +95,17 @@ func NewTensor(value interface{}) (*Tensor, error) {
 		c:     C.TF_AllocateTensor(C.TF_DataType(dataType), shapePtr, C.int(len(shape)), C.size_t(nbytes)),
 		shape: shape,
 	}
-	runtime.SetFinalizer(t, (*Tensor).finalize)
+
 	raw := tensorData(t.c)
+
+	runtime.SetFinalizer(t, func(t *Tensor) {
+		if dataType == String {
+			t.clearTStrings(raw, nflattened)
+		}
+
+		t.finalize()
+	})
+
 	buf := bytes.NewBuffer(raw[:0:len(raw)])
 
 	if isAllArray(val.Type()) {
@@ -168,11 +177,18 @@ func ReadTensor(dataType DataType, shape []int64, r io.Reader) (*Tensor, error) 
 	if err := isTensorSerializable(dataType); err != nil {
 		return nil, err
 	}
-	nbytes := TypeOf(dataType, nil).Size() * uintptr(numElements(shape))
+
 	var shapePtr *C.int64_t
 	if len(shape) > 0 {
+		for _, dim := range shape {
+			if dim < 0 {
+				return nil, fmt.Errorf("all shape dimentions should be non-negative: %v", shape)
+			}
+		}
 		shapePtr = (*C.int64_t)(unsafe.Pointer(&shape[0]))
 	}
+
+	nbytes := TypeOf(dataType, nil).Size() * uintptr(numElements(shape))
 	t := &Tensor{
 		c:     C.TF_AllocateTensor(C.TF_DataType(dataType), shapePtr, C.int(len(shape)), C.size_t(nbytes)),
 		shape: shape,
@@ -199,6 +215,14 @@ func newTensorFromC(c *C.TF_Tensor) *Tensor {
 	return t
 }
 
+func (t *Tensor) clearTStrings(raw []byte, n int64) {
+	tstrs := (*(*[]C.TF_TString)(unsafe.Pointer(&raw)))[:n]
+
+	for _, tstr := range tstrs {
+		C.TF_TString_Dealloc(&tstr)
+	}
+}
+
 func (t *Tensor) finalize() { C.TF_DeleteTensor(t.c) }
 
 // DataType returns the scalar datatype of the Tensor.
@@ -208,25 +232,29 @@ func (t *Tensor) DataType() DataType { return DataType(C.TF_TensorType(t.c)) }
 func (t *Tensor) Shape() []int64 { return t.shape }
 
 // Reshape  updates tensor's shape in place if this is possible or returns an error otherwise.
-func (t *Tensor) Reshape(new_shape []int64) error {
-	old_shape_size := numElements(t.shape)
-	new_shape_size := numElements(new_shape)
+func (t *Tensor) Reshape(newShape []int64) error {
+	oldShapeSize := numElements(t.shape)
+	newShapeSize := numElements(newShape)
 
-	if old_shape_size != new_shape_size {
-		return fmt.Errorf("unable to convert shape %v (num_elements: %d) into shape %v (num_elements: %d)", t.shape, old_shape_size, new_shape, new_shape_size)
+	if oldShapeSize != newShapeSize {
+		return fmt.Errorf("unable to convert shape %v (num_elements: %d) into shape %v (num_elements: %d)", t.shape, oldShapeSize, newShape, newShapeSize)
 	}
 
-	if len(new_shape) == 0 {
+	if len(newShape) == 0 {
 		return nil
 	}
 
 	var shapePtr *C.int64_t
-	shapePtr = (*C.int64_t)(unsafe.Pointer(&new_shape[0]))
+	shapePtr = (*C.int64_t)(unsafe.Pointer(&newShape[0]))
 
 	status := newStatus()
-	C.TF_TensorBitcastFrom(t.c, C.TF_TensorType(t.c), t.c, shapePtr, C.int(len(new_shape)), status.c)
+	C.TF_TensorBitcastFrom(t.c, C.TF_TensorType(t.c), t.c, shapePtr, C.int(len(newShape)), status.c)
 
-	return status.Err()
+	if err := status.Err(); err != nil {
+		return err
+	}
+	t.shape = newShape
+	return nil
 }
 
 // Value converts the Tensor to a Go value. For now, not all Tensor types are
@@ -351,7 +379,7 @@ func decodeOneDimString(raw []byte, nStrings int) ([]string, error) {
 //
 // WARNING: WriteContentsTo is not comprehensive and will fail
 // if t.DataType() is non-numeric (e.g., String). See
-// https://github.com/tensorflow/tensorflow/issues/6003.
+// https://github.com/galeone/tensorflow/issues/6003.
 func (t *Tensor) WriteContentsTo(w io.Writer) (int64, error) {
 	if err := isTensorSerializable(t.DataType()); err != nil {
 		return 0, err
@@ -520,7 +548,7 @@ func copyPtr(w *bytes.Buffer, ptr unsafe.Pointer, l int) error {
 }
 
 func bug(format string, args ...interface{}) error {
-	return fmt.Errorf("BUG: Please report at https://github.com/tensorflow/tensorflow/issues with the note: Go TensorFlow %v: %v", Version(), fmt.Sprintf(format, args...))
+	return fmt.Errorf("BUG: Please report at https://github.com/galeone/tensorflow/issues with the note: Go TensorFlow %v: %v", Version(), fmt.Sprintf(format, args...))
 }
 
 func isTensorSerializable(dataType DataType) error {
@@ -536,6 +564,6 @@ func isTensorSerializable(dataType DataType) error {
 	case Float, Double, Int32, Uint8, Int16, Int8, Complex, Int64, Bool, Quint8, Qint32, Bfloat16, Qint16, Quint16, Uint16, Complex128, Half:
 		return nil
 	default:
-		return fmt.Errorf("serialization of tensors with the DataType %d is not yet supported, see https://github.com/tensorflow/tensorflow/issues/6003", dataType)
+		return fmt.Errorf("serialization of tensors with the DataType %d is not yet supported, see https://github.com/galeone/tensorflow/issues/6003", dataType)
 	}
 }
